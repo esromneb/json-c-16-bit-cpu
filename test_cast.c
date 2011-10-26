@@ -53,10 +53,8 @@ static void getit(struct json_object *new_obj, const char *field)
 	enum json_type o_type = json_object_get_type(o);
 	printf("new_obj.%s json_object_get_type()=%s\n", field,
 	       json_type_to_name(o_type));
-	printf("new_obj.%s json_object_get_int()=%d\n", field,
+	printf("new_obj.%s json_object_get_int()=%ld\n", field,
 	       json_object_get_int(o));
-	printf("new_obj.%s json_object_get_int64()=%" PRId64 "\n", field,
-	       json_object_get_int64(o));
 	printf("new_obj.%s json_object_get_boolean()=%d\n", field,
 	       json_object_get_boolean(o));
 	printf("new_obj.%s json_object_get_double()=%f\n", field,

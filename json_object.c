@@ -202,15 +202,15 @@ static int json_object_object_to_json_string(struct json_object* jso,
   /* CAW: switched to json_object_object_foreachC which uses an iterator struct */
 	json_object_object_foreachC(jso, iter) {
 			if(i) sprintbuf(pb, ",");
-			sprintbuf(pb, " \"");
+			sprintbuf(pb, "\"");
 			json_escape_str(pb, iter.key, strlen(iter.key));
-			sprintbuf(pb, "\": ");
+			sprintbuf(pb, "\":");
 			if(iter.val == NULL) sprintbuf(pb, "null");
 			else iter.val->_to_json_string(iter.val, pb);
 			i++;
 	}
 
-  return sprintbuf(pb, " }");
+  return sprintbuf(pb, "}");
 }
 
 static void json_object_lh_entry_free(struct lh_entry *ent)
@@ -291,7 +291,7 @@ boolean json_object_get_boolean(struct json_object *jso)
   case json_type_boolean:
     return jso->o.c_boolean;
   case json_type_int:
-    return (jso->o.c_int64 != 0);
+    return (jso->o.c_int != 0);
   case json_type_double:
     return (jso->o.c_double != 0);
   case json_type_string:
@@ -307,7 +307,7 @@ boolean json_object_get_boolean(struct json_object *jso)
 static int json_object_int_to_json_string(struct json_object* jso,
 					  struct printbuf *pb)
 {
-  return sprintbuf(pb, "%"PRId64, jso->o.c_int64);
+  return sprintbuf(pb, "%ld", jso->o.c_int);
 }
 
 struct json_object* json_object_new_int(int32_t i)
@@ -315,69 +315,24 @@ struct json_object* json_object_new_int(int32_t i)
   struct json_object *jso = json_object_new(json_type_int);
   if(!jso) return NULL;
   jso->_to_json_string = &json_object_int_to_json_string;
-  jso->o.c_int64 = i;
+  jso->o.c_int = i;
   return jso;
 }
 
 int32_t json_object_get_int(struct json_object *jso)
 {
-  if(!jso) return 0;
-
-  enum json_type o_type = jso->o_type;
-  int64_t cint64 = jso->o.c_int64;
-
-  if (o_type == json_type_string)
-  {
-	/*
-	 * Parse strings into 64-bit numbers, then use the
-	 * 64-to-32-bit number handling below.
-	 */
-	if (json_parse_int64(jso->o.c_string.str, &cint64) != 0)
-		return 0; /* whoops, it didn't work. */
-	o_type = json_type_int;
-  }
-
-  switch(o_type) {
-  case json_type_int:
-	/* Make sure we return the correct values for out of range numbers. */
-	if (cint64 <= INT32_MIN)
-		return INT32_MIN;
-	else if (cint64 >= INT32_MAX)
-		return INT32_MAX;
-	else
-		return (int32_t)cint64;
-  case json_type_double:
-    return (int32_t)jso->o.c_double;
-  case json_type_boolean:
-    return jso->o.c_boolean;
-  default:
-    return 0;
-  }
-}
-
-struct json_object* json_object_new_int64(int64_t i)
-{
-  struct json_object *jso = json_object_new(json_type_int);
-  if(!jso) return NULL;
-  jso->_to_json_string = &json_object_int_to_json_string;
-  jso->o.c_int64 = i;
-  return jso;
-}
-
-int64_t json_object_get_int64(struct json_object *jso)
-{
-   int64_t cint;
+  int32_t cint;
 
   if(!jso) return 0;
   switch(jso->o_type) {
   case json_type_int:
-    return jso->o.c_int64;
+    return jso->o.c_int;
   case json_type_double:
-    return (int64_t)jso->o.c_double;
+    return (int32_t)jso->o.c_double;
   case json_type_boolean:
     return jso->o.c_boolean;
   case json_type_string:
-	if (json_parse_int64(jso->o.c_string.str, &cint) == 0) return cint;
+    if(sscanf(jso->o.c_string.str, "%ld", &cint) == 1) return cint;
   default:
     return 0;
   }
@@ -410,7 +365,7 @@ double json_object_get_double(struct json_object *jso)
   case json_type_double:
     return jso->o.c_double;
   case json_type_int:
-    return jso->o.c_int64;
+    return jso->o.c_int;
   case json_type_boolean:
     return jso->o.c_boolean;
   case json_type_string:
@@ -492,14 +447,13 @@ static int json_object_array_to_json_string(struct json_object* jso,
   sprintbuf(pb, "[");
   for(i=0; i < json_object_array_length(jso); i++) {
 	  struct json_object *val;
-	  if(i) { sprintbuf(pb, ", "); }
-	  else { sprintbuf(pb, " "); }
+	  if(i) { sprintbuf(pb, ","); }
 
       val = json_object_array_get_idx(jso, i);
 	  if(val == NULL) { sprintbuf(pb, "null"); }
 	  else { val->_to_json_string(val, pb); }
   }
-  return sprintbuf(pb, " ]");
+  return sprintbuf(pb, "]");
 }
 
 static void json_object_array_entry_free(void *data)
@@ -532,11 +486,6 @@ struct array_list* json_object_get_array(struct json_object *jso)
   default:
     return NULL;
   }
-}
-
-void json_object_array_sort(struct json_object *jso, int(*sort_fn)(const void *, const void *))
-{
-  array_list_sort(jso->o.c_array, sort_fn);
 }
 
 int json_object_array_length(struct json_object *jso)

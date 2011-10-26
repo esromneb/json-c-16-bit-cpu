@@ -12,6 +12,8 @@
 #ifndef _json_object_h_
 #define _json_object_h_
 
+#include "json_inttypes.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -195,16 +197,6 @@ extern struct array_list* json_object_get_array(struct json_object *obj);
  */
 extern int json_object_array_length(struct json_object *obj);
 
-/** Sorts the elements of jso of type json_type_array
-*
-* Pointers to the json_object pointers will be passed as the two arguments
-* to @sort_fn
-*
-* @param obj the json_object instance
-* @param sort_fn a sorting function
-*/
-extern void json_object_array_sort(struct json_object *jso, int(*sort_fn)(const void *, const void *));
-
 /** Add an element to the end of a json_object of type json_type_array
  *
  * The reference count will *not* be incremented. This is to make adding
@@ -268,20 +260,10 @@ extern boolean json_object_get_boolean(struct json_object *obj);
 /* int type methods */
 
 /** Create a new empty json_object of type json_type_int
- * Note that values are stored as 64-bit values internally.
- * To ensure the full range is maintained, use json_object_new_int64 instead.
  * @param i the integer
  * @returns a json_object of type json_type_int
  */
 extern struct json_object* json_object_new_int(int32_t i);
-
-
-/** Create a new empty json_object of type json_type_int
- * @param i the integer
- * @returns a json_object of type json_type_int
- */
-extern struct json_object* json_object_new_int64(int64_t i);
-
 
 /** Get the int value of a json_object
  *
@@ -289,25 +271,10 @@ extern struct json_object* json_object_new_int64(int64_t i);
  * double objects will return their integer conversion. Strings will be
  * parsed as an integer. If no conversion exists then 0 is returned.
  *
- * Note that integers are stored internally as 64-bit values.
- * If the value of too big or too small to fit into 32-bit, INT32_MAX or
- * INT32_MIN are returned, respectively.
- *
  * @param obj the json_object instance
  * @returns an int
  */
 extern int32_t json_object_get_int(struct json_object *obj);
-
-/** Get the int value of a json_object
- *
- * The type is coerced to a int64 if the passed object is not a int64.
- * double objects will return their int64 conversion. Strings will be
- * parsed as an int64. If no conversion exists then 0 is returned.
- *
- * @param obj the json_object instance
- * @returns an int64
- */
-extern int64_t json_object_get_int64(struct json_object *obj);
 
 
 /* double type methods */

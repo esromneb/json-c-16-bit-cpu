@@ -30,7 +30,7 @@ struct json_object
   union data {
     boolean c_boolean;
     double c_double;
-    int64_t c_int64;
+    int32_t c_int;
     struct lh_table *c_object;
     struct array_list *c_array;
     struct {

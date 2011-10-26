@@ -14,7 +14,7 @@
 
 #include <stddef.h>
 #include "json_object.h"
-
+#include "json_inttypes.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -77,7 +77,7 @@ struct json_tokener
   struct printbuf *pb;
   int depth, is_double, st_pos, char_offset;
   enum json_tokener_error err;
-  unsigned int32_t ucs_char;
+  uint32_t ucs_char;
   char quote_char;
   struct json_tokener_srec stack[JSON_TOKENER_MAX_DEPTH];
 };

@@ -20,7 +20,6 @@
 #include <stddef.h>
 #include <ctype.h>
 #include <string.h>
-#include <limits.h>
 
 #include "bits.h"
 #include "debug.h"
@@ -424,7 +423,7 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 
     case json_tokener_state_escape_unicode:
 	{
-          unsigned int got_hi_surrogate = 0;
+          uint32_t got_hi_surrogate = 0;
 
 	  /* Handle a 4-byte sequence, or two sequences if a surrogate pair */
 	  while(1) {
@@ -560,11 +559,11 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
           printbuf_memappend_fast(tok->pb, case_start, case_len);
       }
       {
-	int64_t num64;
-	double  numd;
-	if (!tok->is_double && json_parse_int64(tok->pb->buf, &num64) == 0) {
-		current = json_object_new_int64(num64);
-	} else if(tok->is_double && sscanf(tok->pb->buf, "%lf", &numd) == 1) {
+        int32_t numi;
+        double numd;
+        if (!tok->is_double && sscanf(tok->pb->buf, "%ld", &numi) == 1) {
+          current = json_object_new_int(numi);
+        } else if(tok->is_double && sscanf(tok->pb->buf, "%lf", &numd) == 1) {
           current = json_object_new_double(numd);
         } else {
           tok->err = json_tokener_error_parse_number;
